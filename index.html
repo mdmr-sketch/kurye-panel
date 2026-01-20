@@ -3,116 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kurye Admin Panel</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Kurye Admin Paneli</title>
 </head>
 
-<body class="bg-gray-900 text-white">
+<body style="font-family:Arial;max-width:500px;margin:auto;padding:10px;">
 
-<header class="bg-gray-800 p-4 text-center font-bold">
-  🚚 Kurye Admin Panel
-</header>
+  <h2>🚚 Kurye Admin Paneli</h2>
 
-<main class="p-4 space-y-4" id="content">
+  <!-- WhatsApp Sipariş Al -->
+  <a href="https://wa.me/905304028140?text=Merhaba%20Siparis%20bilgileriniz:%0AAd:%0ATelefon:%0AAlinacak%20Adres:%0ATeslim%20Adres:"
+     target="_blank"
+     style="display:block;background:#25D366;color:white;
+            text-align:center;padding:15px;border-radius:8px;
+            margin:10px 0;font-weight:bold;text-decoration:none;">
+    📲 WhatsApp’tan Sipariş Al
+  </a>
 
-<section id="home">
-  <a href="https://wa.me/905304028140" target="_blank"
-   style="display:block;background:#25D366;color:white;
-          text-align:center;padding:15px;border-radius:8px;
-          margin:10px;font-weight:bold;text-decoration:none;">
-  📲 WhatsApp’tan Sipariş Al
-</a>
-  <div class="grid grid-cols-2 gap-3">
-    <div class="bg-gray-800 p-3 rounded text-center">
-      <div class="text-sm text-gray-400">Aktif Sipariş</div>
-      <div class="text-2xl font-bold">5</div>
-    </div>
-    <div class="bg-gray-800 p-3 rounded text-center">
-      <div class="text-sm text-gray-400">Aktif Kurye</div>
-      <div class="text-2xl font-bold">3</div>
-    </div>
-  </div>
+  <hr>
 
-  <button onclick="showPage('orders')" class="mt-4 w-full bg-blue-600 p-3 rounded">
-    📦 Siparişler
-  <button onclick="showPage('map')" class="mt-2 w-full bg-green-600 p-3 rounded">
-    🗺️ Harita
-</section>
+  <!-- Yeni Sipariş Formu -->
+  <h3>📦 Yeni Sipariş Ekle</h3>
 
-<section id="orders" class="hidden space-y-3">
-  <h2 class="text-lg font-bold">📦 Siparişler</h2>
+  <input id="musteri" placeholder="Müşteri Adı"
+         style="width:100%;padding:10px;margin:5px 0;">
 
-  <div class="bg-gray-800 p-3 rounded">
-    <div class="font-bold">Sipariş #1023</div>
-    <div class="text-sm text-gray-400">Kurye: Ahmet</div>
-    <div class="text-yellow-400">Durum: Yolda</div>
-  </div>
-</section>
+  <input id="telefon" placeholder="Telefon"
+         style="width:100%;padding:10px;margin:5px 0;">
 
-<section id="couriers" class="hidden space-y-3">
-  <h2 class="text-lg font-bold">🏍️ Kuryeler</h2>
+  <textarea id="adres" placeholder="Adres / Sipariş Detayı (WhatsApp'tan yapıştır)"
+            style="width:100%;padding:10px;margin:5px 0;"></textarea>
 
-  <div class="bg-gray-800 p-3 rounded">
-    <div class="font-bold">🟢 Mehmet</div>
-    <div class="text-sm text-gray-400">Aktif Sipariş: 2</div>
-  </div>
-</section>
+  <h4>🖼️ Sipariş Fotoğrafı (varsa)</h4>
+  <input type="file" id="resim" accept="image/*"
+         style="width:100%;margin:10px 0;">
 
-<section id="map" class="hidden">
-  <h2 class="text-lg font-bold mb-2">🗺️ Harita</h2>
-  <div class="bg-gray-800 rounded h-64 flex items-center justify-center text-gray-400">
-    Harita Alanı
-  </div>
-</section>
+  <button onclick="siparisEkle()"
+          style="width:100%;padding:14px;background:#007bff;
+                 color:white;border:none;border-radius:8px;
+                 font-size:16px;">
+    ➕ Siparişi Kaydet
+  </button>
 
-</main>
+  <hr>
 
-<nav class="fixed bottom-0 left-0 right-0 bg-gray-800 flex justify-around p-2">
-  <button onclick="showPage('home')">🏠</button>
-  <button onclick="showPage('orders')">📦</button>
-  <button onclick="showPage('couriers')">🏍️</button>
-  <button onclick="showPage('map')">🗺️</button>
-</nav>
+  <!-- Sipariş Listesi -->
+  <h3>📋 Siparişler</h3>
+  <ul id="siparisler" style="list-style:none;padding:0;"></ul>
 
-<script>
-function siparisEkle() {
-  let musteri = document.getElementById("musteri").value;
-  let telefon = document.getElementById("telefon").value;
-  let adres = document.getElementById("adres").value;
+  <!-- JavaScript -->
+  <script>
+    function siparisEkle() {
+      let musteri = document.getElementById("musteri").value;
+      let telefon = document.getElementById("telefon").value;
+      let adres = document.getElementById("adres").value;
+      let resim = document.getElementById("resim").files[0];
 
-  if (!musteri || !telefon || !adres) {
-    alert("Lütfen tüm alanları doldurun");
-    return;
-  }
+      if (!musteri || !telefon || !adres) {
+        alert("Lütfen tüm alanları doldurun");
+        return;
+      }
 
-  let li = document.createElement("li");
-  li.style.border = "1px solid #ccc";
-  li.style.padding = "10px";
-  li.style.margin = "5px 0";
+      let li = document.createElement("li");
+      li.style.border = "1px solid #ccc";
+      li.style.padding = "10px";
+      li.style.margin = "10px 0";
+      li.style.borderRadius = "6px";
 
-  li.innerHTML = `
-    <b>${musteri}</b><br>
-    📞 ${telefon}<br>
-    📍 ${adres}
-  `;
+      let html = `
+        <b>${musteri}</b><br>
+        📞 ${telefon}<br>
+        📍 ${adres}<br>
+      `;
 
-  document.getElementById("siparisler").appendChild(li);
+      if (resim) {
+        let imgURL = URL.createObjectURL(resim);
+        html += `<img src="${imgURL}"
+                     style="width:100%;margin-top:8px;border-radius:6px;">`;
+      }
 
-  document.getElementById("musteri").value = "";
-  document.getElementById("telefon").value = "";
-  document.getElementById("adres").value = "";
-}
-</script>
-<a href="https://wa.me/905XXXXXXXXX?text=Merhaba%20Siparis%20bilgileriniz:%0AAd:%0ATelefon:%0AAlinacak%20Adres:%0ATeslim%20Adres:"
-   target="_blank"
-   style="display:block;background:#25D366;color:white;
-          text-align:center;padding:15px;border-radius:8px;
-          margin:10px;font-weight:bold;text-decoration:none;">
-  📲 WhatsApp’tan Sipariş Al
-</a>
-  <h3>🖼️ Sipariş Fotoğrafı</h3>
+      li.innerHTML = html;
+      document.getElementById("siparisler").appendChild(li);
 
-<input type="file" id="resim" accept="image/*"
-       style="width:100%;margin:10px 0;">
+      document.getElementById("musteri").value = "";
+      document.getElementById("telefon").value = "";
+      document.getElementById("adres").value = "";
+      document.getElementById("resim").value = "";
+    }
+  </script>
+
 </body>
 </html>
