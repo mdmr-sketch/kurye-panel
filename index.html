@@ -6,10 +6,6 @@
 <title>Kurye Admin Paneli</title>
 
 <style>
-  <button style="background:green;margin-top:5px"
-  onclick='whatsappGonder(${JSON.stringify(s)})'>
-  📲 Kuryeye Gönder
-</button>
 body { font-family: Arial; background:#f4f4f4; padding:10px; }
 h2 { text-align:center; }
 input, select, textarea, button {
@@ -37,9 +33,9 @@ button { background:#007bff; color:white; border:none; border-radius:6px; }
 
 <select id="kurye">
   <option value="">Kurye Seç</option>
-  <option value="905551111111">Ahmet</option>
-  <option value="905552222222">Mehmet</option>
-  <option value="905553333333">Ali</option>
+  <option>Ahmet</option>
+  <option>Mehmet</option>
+  <option>Ali</option>
 </select>
 
 <select id="durum">
@@ -138,20 +134,6 @@ function temizle(){
 }
 
 listele();
-  <script>
-function whatsappGonder(s){
-  const mesaj =
-`📦 YENİ SİPARİŞ
-
-👤 Müşteri: ${s.musteri}
-📍 Adres: ${s.adres}
-📝 Not: ${s.not || "-"}
-📌 Durum: ${s.durum}`;
-
-  const url = "https://wa.me/" + s.kurye + "?text=" + encodeURIComponent(mesaj);
-  window.open(url, "_blank");
-}
-</script>
 </script>
 
 </body>
