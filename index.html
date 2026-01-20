@@ -1,36 +1,55 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kurye Admin Paneli</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kurye Admin Paneli</title>
 </head>
 
 <body style="font-family:Arial;max-width:500px;margin:auto;padding:10px;">
 
 <h2>🚚 Kurye Admin Paneli</h2>
 
+<!-- WhatsApp -->
 <a href="https://wa.me/905304028140?text=Merhaba%20Siparis%20bilgileriniz:%0AAd:%0ATelefon:%0AAlinacak%20Adres:%0ATeslim%20Adres:"
-   target="_blank"
-   style="display:block;background:#25D366;color:white;
-          text-align:center;padding:15px;border-radius:8px;
-          margin:10px 0;font-weight:bold;text-decoration:none;">
+target="_blank"
+style="display:block;background:#25D366;color:white;text-align:center;
+padding:15px;border-radius:8px;margin:10px 0;font-weight:bold;text-decoration:none;">
 📲 WhatsApp’tan Sipariş Al
 </a>
 
 <hr>
 
+<!-- Kurye Ekle -->
+<h3>🚴 Kurye Ekle</h3>
+<input id="kuryeAdi" placeholder="Kurye Adı"
+style="width:100%;padding:10px;margin:5px 0;">
+<button onclick="kuryeEkle()"
+style="width:100%;padding:12px;background:#28a745;color:white;
+border:none;border-radius:8px;">
+➕ Kurye Ekle
+</button>
+
+<hr>
+
+<!-- Sipariş -->
 <h3>📦 Yeni Sipariş</h3>
 
 <input id="musteri" placeholder="Müşteri Adı" style="width:100%;padding:10px;margin:5px 0;">
 <input id="telefon" placeholder="Telefon" style="width:100%;padding:10px;margin:5px 0;">
-<textarea id="adres" placeholder="Adres / Sipariş Detayı" style="width:100%;padding:10px;margin:5px 0;"></textarea>
+<textarea id="adres" placeholder="Adres / Sipariş Detayı"
+style="width:100%;padding:10px;margin:5px 0;"></textarea>
 
-<h4>🖼️ Sipariş Fotoğrafı</h4>
+<select id="kuryeSec"
+style="width:100%;padding:10px;margin:5px 0;">
+<option value="">🚴 Kurye Seç</option>
+</select>
+
 <input type="file" id="resim" accept="image/*" style="width:100%;margin:10px 0;">
 
-<button onclick="siparisEkle()" style="width:100%;padding:14px;background:#007bff;
-color:white;border:none;border-radius:8px;font-size:16px;">
+<button onclick="siparisEkle()"
+style="width:100%;padding:14px;background:#007bff;color:white;
+border:none;border-radius:8px;font-size:16px;">
 ➕ Siparişi Kaydet
 </button>
 
@@ -40,66 +59,58 @@ color:white;border:none;border-radius:8px;font-size:16px;">
 <ul id="siparisler" style="list-style:none;padding:0;"></ul>
 
 <script>
+let kuryeler = JSON.parse(localStorage.getItem("kuryeler")) || [];
 let siparisler = JSON.parse(localStorage.getItem("siparisler")) || [];
 
-window.onload = function() {
+window.onload = function () {
+  kuryeler.forEach(k => kuryeSelectEkle(k));
   siparisler.forEach(s => listeyeEkle(s));
 };
+
+function kuryeEkle() {
+  let ad = document.getElementById("kuryeAdi").value;
+  if (!ad) return alert("Kurye adı gir");
+
+  kuryeler.push(ad);
+  localStorage.setItem("kuryeler", JSON.stringify(kuryeler));
+  kuryeSelectEkle(ad);
+
+  document.getElementById("kuryeAdi").value = "";
+}
+
+function kuryeSelectEkle(ad) {
+  let opt = document.createElement("option");
+  opt.value = ad;
+  opt.textContent = ad;
+  document.getElementById("kuryeSec").appendChild(opt);
+}
 
 function siparisEkle() {
   let musteri = musteriInput().value;
   let telefon = telefonInput().value;
   let adres = adresInput().value;
-  let resimDosya = document.getElementById("resim").files[0];
+  let kurye = document.getElementById("kuryeSec").value;
+  let resim = document.getElementById("resim").files[0];
 
-  if (!musteri || !telefon || !adres) {
-    alert("Lütfen tüm alanları doldurun");
+  if (!musteri || !telefon || !adres || !kurye) {
+    alert("Tüm alanları doldur");
     return;
   }
 
-  if (resimDosya) {
+  if (resim) {
     let reader = new FileReader();
-    reader.onload = function() {
-      kaydet(musteri, telefon, adres, reader.result);
-    };
-    reader.readAsDataURL(resimDosya);
+    reader.onload = () => kaydet(musteri, telefon, adres, kurye, reader.result);
+    reader.readAsDataURL(resim);
   } else {
-    kaydet(musteri, telefon, adres, null);
+    kaydet(musteri, telefon, adres, kurye, null);
   }
 
   musteriInput().value = "";
   telefonInput().value = "";
   adresInput().value = "";
+  document.getElementById("kuryeSec").value = "";
   document.getElementById("resim").value = "";
 }
 
-function kaydet(musteri, telefon, adres, resim) {
-  let siparis = { musteri, telefon, adres, resim };
-  siparisler.push(siparis);
-  localStorage.setItem("siparisler", JSON.stringify(siparisler));
-  listeyeEkle(siparis);
-}
-
-function listeyeEkle(s) {
-  let li = document.createElement("li");
-  li.style.border = "1px solid #ccc";
-  li.style.padding = "10px";
-  li.style.margin = "10px 0";
-  li.style.borderRadius = "6px";
-
-  li.innerHTML = `<b>${s.musteri}</b><br>📞 ${s.telefon}<br>📍 ${s.adres}<br>`;
-
-  if (s.resim) {
-    li.innerHTML += `<img src="${s.resim}" style="width:100%;margin-top:8px;border-radius:6px;">`;
-  }
-
-  document.getElementById("siparisler").appendChild(li);
-}
-
-function musteriInput(){ return document.getElementById("musteri"); }
-function telefonInput(){ return document.getElementById("telefon"); }
-function adresInput(){ return document.getElementById("adres"); }
-</script>
-
-</body>
-</html>
+function kaydet(musteri, telefon, adres, kurye, resim) {
+  let s
