@@ -4,103 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kurye Admin Paneli</title>
+
+<style>
+body { font-family: Arial; background:#f4f4f4; padding:10px; }
+h2 { text-align:center; }
+input, select, textarea, button {
+  width:100%; padding:10px; margin:6px 0;
+  font-size:15px;
+}
+button { background:#007bff; color:white; border:none; border-radius:6px; }
+.card {
+  background:white; padding:10px; margin:10px 0;
+  border-radius:8px;
+}
+.small { font-size:13px; color:#555; }
+.durum { font-weight:bold; }
+</style>
 </head>
 
-<body style="font-family:Arial;max-width:500px;margin:auto;padding:10px;">
+<body>
 
-<h2>🚚 Kurye Admin Paneli</h2>
+<h2>📦 Kurye Admin Paneli</h2>
 
-<!-- WhatsApp -->
-<a href="https://wa.me/905XXXXXXXXX?text=Merhaba%20Siparis%20bilgileriniz:%0AAd:%0ATelefon:%0AAlinacak%20Adres:%0ATeslim%20Adres:"
-target="_blank"
-style="display:block;background:#25D366;color:white;text-align:center;
-padding:15px;border-radius:8px;margin:10px 0;font-weight:bold;text-decoration:none;">
-📲 WhatsApp’tan Sipariş Al
-</a>
+<!-- SİPARİŞ FORMU -->
+<input id="musteri" placeholder="Müşteri Adı">
+<input id="adres" placeholder="Adres">
+<textarea id="not" placeholder="Sipariş Notu"></textarea>
 
-<hr>
-
-<!-- Kurye Ekle -->
-<h3>🚴 Kurye Ekle</h3>
-<input id="kuryeAdi" placeholder="Kurye Adı" style="width:100%;padding:10px;margin:5px 0;">
-<button onclick="kuryeEkle()" style="width:100%;padding:12px;background:#28a745;color:white;border:none;border-radius:8px;">
-➕ Kurye Ekle
-</button>
-
-<hr>
-
-<!-- Sipariş -->
-<h3>📦 Yeni Sipariş</h3>
-
-<input id="musteri" placeholder="Müşteri Adı" style="width:100%;padding:10px;margin:5px 0;">
-<input id="telefon" placeholder="Telefon" style="width:100%;padding:10px;margin:5px 0;">
-<textarea id="adres" placeholder="Adres / Sipariş Detayı" style="width:100%;padding:10px;margin:5px 0;"></textarea>
-
-<select id="kuryeSec" style="width:100%;padding:10px;margin:5px 0;">
-<option value="">🚴 Kurye Seç</option>
+<select id="kurye">
+  <option value="">Kurye Seç</option>
+  <option>Ahmet</option>
+  <option>Mehmet</option>
+  <option>Ali</option>
 </select>
 
-<input type="file" id="resim" accept="image/*" style="width:100%;margin:10px 0;">
+<select id="durum">
+  <option>Bekliyor</option>
+  <option>Yolda</option>
+  <option>Teslim Edildi</option>
+</select>
 
-<button onclick="siparisEkle()" style="width:100%;padding:14px;background:#007bff;color:white;border:none;border-radius:8px;font-size:16px;">
-➕ Siparişi Kaydet
-</button>
+<input type="file" id="foto">
+
+<button onclick="siparisEkle()">➕ Siparişi Kaydet</button>
 
 <hr>
 
 <h3>📋 Siparişler</h3>
-<ul id="siparisler" style="list-style:none;padding:0;"></ul>
+<div id="liste"></div>
 
 <script>
-let kuryeler = JSON.parse(localStorage.getItem("kuryeler")) || [];
 let siparisler = JSON.parse(localStorage.getItem("siparisler")) || [];
 
-window.onload = function () {
-  kuryeler.forEach(k => kuryeSelectEkle(k));
-  siparisler.forEach((s,i) => listeyeEkle(s,i));
-};
+function siparisEkle(){
+  const musteri = document.getElementById("musteri").value;
+  const adres = document.getElementById("adres").value;
+  const not = document.getElementById("not").value;
+  const kurye = document.getElementById("kurye").value;
+  const durum = document.getElementById("durum").value;
+  const fotoInput = document.getElementById("foto");
 
-function kuryeEkle() {
-  let ad = document.getElementById("kuryeAdi").value;
-  if (!ad) return alert("Kurye adı gir");
-  kuryeler.push(ad);
-  localStorage.setItem("kuryeler", JSON.stringify(kuryeler));
-  kuryeSelectEkle(ad);
-  document.getElementById("kuryeAdi").value = "";
-}
-
-function kuryeSelectEkle(ad) {
-  let opt = document.createElement("option");
-  opt.value = ad;
-  opt.textContent = ad;
-  document.getElementById("kuryeSec").appendChild(opt);
-}
-
-function siparisEkle() {
-  let musteri = val("musteri");
-  let telefon = val("telefon");
-  let adres = val("adres");
-  let kurye = val("kuryeSec");
-  let resim = document.getElementById("resim").files[0];
-
-  if (!musteri || !telefon || !adres || !kurye) {
-    alert("Tüm alanları doldur");
+  if(!musteri || !adres){
+    alert("Müşteri ve adres zorunlu");
     return;
   }
 
-  let durum = "Bekliyor";
-
-  if (resim) {
-    let reader = new FileReader();
-    reader.onload = () => kaydet(musteri, telefon, adres, kurye, durum, reader.result);
-    reader.readAsDataURL(resim);
-  } else {
-    kaydet(musteri, telefon, adres, kurye, durum, null);
+  const reader = new FileReader();
+  reader.onload = function(){
+    siparisler.push({
+      id: Date.now(),
+      musteri, adres, not, kurye, durum,
+      foto: reader.result
+    });
+    kaydet();
   }
 
-  clearForm();
+  if(fotoInput.files[0]){
+    reader.readAsDataURL(fotoInput.files[0]);
+  } else {
+    siparisler.push({
+      id: Date.now(),
+      musteri, adres, not, kurye, durum,
+      foto: null
+    });
+    kaydet();
+  }
 }
 
-function kaydet(musteri, telefon, adres, kurye, durum, resim) {
-  let s = { musteri, telefon, adres, kurye, durum, resim };
-  siparisler.push(s
+function kaydet(){
+  localStorage.setItem("siparisler", JSON.stringify(siparisler));
+  listele();
+  temizle();
+}
+
+function listele(){
+  const alan = document.getElementById("liste");
+  alan.innerHTML = "";
+
+  siparisler.forEach((s,i)=>{
+    alan.innerHTML += `
+      <div class="card">
+        <b>${s.musteri}</b>
+        <div class="small">${s.adres}</div>
+        <div>${s.not || ""}</div>
+        <div>🚴 Kurye: ${s.kurye || "Atanmadı"}</div>
+        <div class="durum">📌 ${s.durum}</div>
+        ${s.foto ? `<img src="${s.foto}" style="width:100%;margin-top:5px">` : ""}
+        <button style="background:red;margin-top:5px"
+          onclick="sil(${s.id})">🗑 Siparişi Sil</button>
+      </div>
+    `;
+  });
+}
+
+function sil(id){
+  if(confirm("Bu siparişi silmek istediğine emin misin?")){
+    siparisler = siparisler.filter(s => s.id !== id);
+    kaydet();
+  }
+}
+
+function temizle(){
+  document.getElementById("musteri").value="";
+  document.getElementById("adres").value="";
+  document.getElementById("not").value="";
+  document.getElementById("kurye").value="";
+  document.getElementById("durum").value="Bekliyor";
+  document.get
