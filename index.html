@@ -31,13 +31,13 @@ button { background:#007bff; color:white; border:none; border-radius:6px; }
 <input id="adres" placeholder="Adres">
 <textarea id="not" placeholder="Sipariş Notu"></textarea>
 
-
-</select>
 <select id="kurye">
   <option value="">Kurye Seç</option>
-  <option value="905551111111">Ahmet</option>
-  <option value="905552222222">Mehmet</option>
-  <option value="905553333333">Ali</option>
+  <option>Ahmet</option>
+  <option>Mehmet</option>
+  <option>Ali</option>
+</select>
+
 <select id="durum">
   <option>Bekliyor</option>
   <option>Yolda</option>
@@ -130,4 +130,11 @@ function temizle(){
   document.getElementById("not").value="";
   document.getElementById("kurye").value="";
   document.getElementById("durum").value="Bekliyor";
-  document.get
+  document.getElementById("foto").value="";
+}
+
+listele();
+</script>
+
+</body>
+</html>
