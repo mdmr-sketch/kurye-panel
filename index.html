@@ -77,11 +77,33 @@
 </nav>
 
 <script>
-function showPage(page) {
-  ['home','orders','couriers','map'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
-  document.getElementById(page).classList.remove('hidden');
+<script>
+function siparisEkle() {
+  let musteri = document.getElementById("musteri").value;
+  let telefon = document.getElementById("telefon").value;
+  let adres = document.getElementById("adres").value;
+
+  if (!musteri || !telefon || !adres) {
+    alert("Lütfen tüm alanları doldurun");
+    return;
+  }
+
+  let li = document.createElement("li");
+  li.style.border = "1px solid #ccc";
+  li.style.padding = "10px";
+  li.style.margin = "5px 0";
+
+  li.innerHTML = `
+    <b>${musteri}</b><br>
+    📞 ${telefon}<br>
+    📍 ${adres}
+  `;
+
+  document.getElementById("siparisler").appendChild(li);
+
+  document.getElementById("musteri").value = "";
+  document.getElementById("telefon").value = "";
+  document.getElementById("adres").value = "";
 }
 </script>
 <a href="https://wa.me/905XXXXXXXXX?text=Merhaba%20Siparis%20bilgileriniz:%0AAd:%0ATelefon:%0AAlinacak%20Adres:%0ATeslim%20Adres:"
