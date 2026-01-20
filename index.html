@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kurye Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+
+<header class="bg-gray-800 p-4 text-center font-bold">
+  🚚 Kurye Admin Panel
+</header>
+
+<main class="p-4 space-y-4" id="content">
+
+<section id="home">
+  <div class="grid grid-cols-2 gap-3">
+    <div class="bg-gray-800 p-3 rounded text-center">
+      <div class="text-sm text-gray-400">Aktif Sipariş</div>
+      <div class="text-2xl font-bold">5</div>
+    </div>
+    <div class="bg-gray-800 p-3 rounded text-center">
+      <div class="text-sm text-gray-400">Aktif Kurye</div>
+      <div class="text-2xl font-bold">3</div>
+    </div>
+  </div>
+
+  <button onclick="showPage('orders')" class="mt-4 w-full bg-blue-600 p-3 rounded">
+    📦 Siparişler
+  </button>
+  <button onclick="showPage('map')" class="mt-2 w-full bg-green-600 p-3 rounded">
+    🗺️ Harita
+  </button>
+</section>
+
+<section id="orders" class="hidden space-y-3">
+  <h2 class="text-lg font-bold">📦 Siparişler</h2>
+
+  <div class="bg-gray-800 p-3 rounded">
+    <div class="font-bold">Sipariş #1023</div>
+    <div class="text-sm text-gray-400">Kurye: Ahmet</div>
+    <div class="text-yellow-400">Durum: Yolda</div>
+  </div>
+</section>
+
+<section id="couriers" class="hidden space-y-3">
+  <h2 class="text-lg font-bold">🏍️ Kuryeler</h2>
+
+  <div class="bg-gray-800 p-3 rounded">
+    <div class="font-bold">🟢 Mehmet</div>
+    <div class="text-sm text-gray-400">Aktif Sipariş: 2</div>
+  </div>
+</section>
+
+<section id="map" class="hidden">
+  <h2 class="text-lg font-bold mb-2">🗺️ Harita</h2>
+  <div class="bg-gray-800 rounded h-64 flex items-center justify-center text-gray-400">
+    Harita Alanı
+  </div>
+</section>
+
+</main>
+
+<nav class="fixed bottom-0 left-0 right-0 bg-gray-800 flex justify-around p-2">
+  <button onclick="showPage('home')">🏠</button>
+  <button onclick="showPage('orders')">📦</button>
+  <button onclick="showPage('couriers')">🏍️</button>
+  <button onclick="showPage('map')">🗺️</button>
+</nav>
+
+<script>
+function showPage(page) {
+  ['home','orders','couriers','map'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById(page).classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>
