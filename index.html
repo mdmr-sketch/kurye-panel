@@ -134,6 +134,20 @@ function temizle(){
 }
 
 listele();
+  <script>
+function whatsappGonder(s){
+  const mesaj =
+`📦 YENİ SİPARİŞ
+
+👤 Müşteri: ${s.musteri}
+📍 Adres: ${s.adres}
+📝 Not: ${s.not || "-"}
+📌 Durum: ${s.durum}`;
+
+  const url = "https://wa.me/" + s.kurye + "?text=" + encodeURIComponent(mesaj);
+  window.open(url, "_blank");
+}
+</script>
 </script>
 
 </body>
