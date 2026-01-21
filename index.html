@@ -3,138 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kurye Admin Paneli</title>
+<title>Kurye Takip Paneli</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; padding:10px; }
-h2 { text-align:center; }
-input, select, textarea, button {
-  width:100%; padding:10px; margin:6px 0;
-  font-size:15px;
+h2,h3 { text-align:center; }
+input, select, button {
+  width:100%; padding:10px; margin:6px 0; font-size:15px;
 }
-button { background:#007bff; color:white; border:none; border-radius:6px; }
+button { border:none; border-radius:6px; background:#007bff; color:white; }
 .card {
-  background:white; padding:10px; margin:10px 0;
-  border-radius:8px;
+  background:white; padding:10px; margin:8px 0; border-radius:8px;
 }
-.small { font-size:13px; color:#555; }
-.durum { font-weight:bold; }
+.badge { font-weight:bold; }
+.active { color:green; }
+.break { color:orange; }
+.off { color:red; }
 </style>
 </head>
 
 <body>
 
-<h2>📦 Kurye Admin Paneli</h2>
+<h2>🚚 Kurye & Sipariş Takip</h2>
 
-<!-- SİPARİŞ FORMU -->
-<input id="musteri" placeholder="Müşteri Adı">
-<input id="adres" placeholder="Adres">
-<textarea id="not" placeholder="Sipariş Notu"></textarea>
-
-<select id="kurye">
-  <option value="">Kurye Seç</option>
-  <option>Ahmet</option>
-  <option>Mehmet</option>
-  <option>Ali</option>
+<!-- KURYE EKLE -->
+<h3>👤 Kurye Durumu</h3>
+<input id="kuryeAdi" placeholder="Kurye Adı">
+<select id="kuryeDurum">
+  <option value="Aktif">Aktif</option>
+  <option value="Molada">Molada</option>
+  <option value="İzinli">İzinli</option>
 </select>
+<button onclick="kuryeEkle()">➕ Kurye Ekle / Güncelle</button>
 
-<select id="durum">
-  <option>Bekliyor</option>
-  <option>Yolda</option>
-  <option>Teslim Edildi</option>
-</select>
-
-<input type="file" id="foto">
-
-<button onclick="siparisEkle()">➕ Siparişi Kaydet</button>
+<div id="kuryeListe"></div>
 
 <hr>
 
-<h3>📋 Siparişler</h3>
-<div id="liste"></div>
+<!-- SİPARİŞ -->
+<h3>📦 Sipariş Ekle</h3>
+<input id="isletme" placeholder="İşletme Adı">
+<input id="paket" type="number" placeholder="Paket Adedi">
+<select id="siparisKurye"></select>
+<button onclick="siparisEkle()">➕ Sipariş Ekle</button>
+
+<div id="siparisListe"></div>
+
+<hr>
+
+<button style="background:green" onclick="csvIndir()">📥 Günlük Raporu (Excel) İndir</button>
 
 <script>
+let kuryeler = JSON.parse(localStorage.getItem("kuryeler")) || [];
 let siparisler = JSON.parse(localStorage.getItem("siparisler")) || [];
+let gun = localStorage.getItem("gun") || new Date().toDateString();
 
-function siparisEkle(){
-  const musteri = document.getElementById("musteri").value;
-  const adres = document.getElementById("adres").value;
-  const not = document.getElementById("not").value;
-  const kurye = document.getElementById("kurye").value;
-  const durum = document.getElementById("durum").value;
-  const fotoInput = document.getElementById("foto");
-
-  if(!musteri || !adres){
-    alert("Müşteri ve adres zorunlu");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(){
-    siparisler.push({
-      id: Date.now(),
-      musteri, adres, not, kurye, durum,
-      foto: reader.result
-    });
-    kaydet();
-  }
-
-  if(fotoInput.files[0]){
-    reader.readAsDataURL(fotoInput.files[0]);
-  } else {
-    siparisler.push({
-      id: Date.now(),
-      musteri, adres, not, kurye, durum,
-      foto: null
-    });
-    kaydet();
-  }
+if (gun !== new Date().toDateString()) {
+  localStorage.removeItem("siparisler");
+  siparisler = [];
+  localStorage.setItem("gun", new Date().toDateString());
 }
 
-function kaydet(){
-  localStorage.setItem("siparisler", JSON.stringify(siparisler));
-  listele();
-  temizle();
+// KURYE
+function kuryeEkle(){
+  const ad = kuryeAdi.value;
+  const durum = kuryeDurum.value;
+  if(!ad) return alert("Kurye adı gerekli");
+
+  const mevcut = kuryeler.find(k => k.ad === ad);
+  if(mevcut) mevcut.durum = durum;
+  else kuryeler.push({ ad, durum });
+
+  kaydet();
 }
 
-function listele(){
-  const alan = document.getElementById("liste");
-  alan.innerHTML = "";
+function kuryeGoster(){
+  kuryeListe.innerHTML = "";
+  siparisKurye.innerHTML = "<option value=''>Kurye Seç</option>";
 
-  siparisler.forEach((s,i)=>{
-    alan.innerHTML += `
+  kuryeler.forEach(k=>{
+    const sayi = siparisler
+      .filter(s => s.kurye === k.ad && s.durum !== "Teslim Edildi")
+      .reduce((a,b)=>a+Number(b.paket),0);
+
+    kuryeListe.innerHTML += `
       <div class="card">
-        <b>${s.musteri}</b>
-        <div class="small">${s.adres}</div>
-        <div>${s.not || ""}</div>
-        <div>🚴 Kurye: ${s.kurye || "Atanmadı"}</div>
-        <div class="durum">📌 ${s.durum}</div>
-        ${s.foto ? `<img src="${s.foto}" style="width:100%;margin-top:5px">` : ""}
-        <button style="background:red;margin-top:5px"
-          onclick="sil(${s.id})">🗑 Siparişi Sil</button>
+        <b>${k.ad}</b> –
+        <span class="badge ${k.durum==='Aktif'?'active':k.durum==='Molada'?'break':'off'}">
+          ${k.durum}
+        </span>
+        <div>📦 Üzerindeki Paket: ${sayi}</div>
       </div>
     `;
+    if(k.durum === "Aktif")
+      siparisKurye.innerHTML += `<option>${k.ad}</option>`;
   });
 }
 
-function sil(id){
-  if(confirm("Bu siparişi silmek istediğine emin misin?")){
-    siparisler = siparisler.filter(s => s.id !== id);
-    kaydet();
-  }
+// SİPARİŞ
+function siparisEkle(){
+  const isletme = document.getElementById("isletme").value;
+  const paket = document.getElementById("paket").value;
+  const kurye = document.getElementById("siparisKurye").value;
+  if(!isletme || !paket || !kurye)
+    return alert("Tüm alanlar gerekli");
+
+  siparisler.push({
+    isletme, paket, kurye,
+    durum:"Kuryede",
+    zaman:new Date().toLocaleTimeString()
+  });
+  kaydet();
 }
 
-function temizle(){
-  document.getElementById("musteri").value="";
-  document.getElementById("adres").value="";
-  document.getElementById("not").value="";
-  document.getElementById("kurye").value="";
-  document.getElementById("durum").value="Bekliyor";
-  document.getElementById("foto").value="";
-}
-
-listele();
-</script>
-
-</body>
-</html>
+function siparisGoster(){
+  siparisListe.innerHTML = "";
